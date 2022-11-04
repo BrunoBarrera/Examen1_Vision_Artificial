@@ -7,6 +7,9 @@
 using namespace cv;
 using namespace std;
 
+/*DEFINICION DE FUNCIONES QUE USAREMOS EN LAS IMAGENES*/
+
+/*Funcion de convolucion para aplicar filtros de tamaño kernel = 3, optimizada*/
 int Convolution(int i, int j,double** kernel,Mat imagen) {
 	int m = 0;
 	int n = 0;
@@ -21,6 +24,7 @@ int Convolution(int i, int j,double** kernel,Mat imagen) {
 	return abs(suma);
 }
 
+/*Funcion para pasar imagen de colores a escala de grises*/
 Mat RGB2Gray(Mat imagen, Mat Gray, int fila_original, int columna_original) {
 	int i = 0;
 	int j = 0;
@@ -41,6 +45,7 @@ Mat RGB2Gray(Mat imagen, Mat Gray, int fila_original, int columna_original) {
 	return Gray;
 }
 
+/*Llenamos de ceros las imagenes expendidas que pasen por esta funcion*/
 Mat LlenadoCeros(Mat copia, int fila_original, int columna_original, int filas_copia, int columnas_copia, int filas_limite, int columnas_limite) {
 	int i = 0;
 	int j = 0;
@@ -58,6 +63,7 @@ Mat LlenadoCeros(Mat copia, int fila_original, int columna_original, int filas_c
 	return copia;
 }
 
+/*Funcion de convolucion inicial*/
 float Convolusion(Mat Gray, int extremos, double** kernel, int x, int y) {
 	int i = 0;
 	int j = 0;
@@ -75,6 +81,8 @@ float Convolusion(Mat Gray, int extremos, double** kernel, int x, int y) {
 	}
 	return valorPix;
 }
+
+/*Inicializacion de los valores del kernel para aplicar el filtro Gaussiano*/
 double** InicializaciónKernel(double** kernel, int size_kernel, int sigma, int filas_limite, int columnas_limite) {
 	int i = 0;
 	int j = 0;
@@ -96,7 +104,7 @@ double** InicializaciónKernel(double** kernel, int size_kernel, int sigma, int f
 	}
 	return kernel;
 }
-
+/*Ajuste de bordes de la imagen recibida*/
 Mat AjusteBordes(Mat imagen, Mat copia, int fila_original, int columna_original, int filas_limite, int columnas_limite) {
 	int i = 0;
 	int j = 0;
@@ -118,7 +126,7 @@ Mat AjusteBordes(Mat imagen, Mat copia, int fila_original, int columna_original,
 }
 
 
-
+/*Aplicamos kernel para hacer uso del filtro Gaussiano y suavizar la imagen*/
 Mat AplicaFiltroGauss(Mat Gray, Mat Gauss, double** kernel, int size_kernel, int fila_original, int columna_original) {
 	int i = 0;
 	int j = 0;
@@ -155,11 +163,13 @@ int main() {
 	int size_kernel = 0;
 	float sigma = 0;
 
+	/*Valores de entrada para el usuario*/
 	cout << "Ingresa kernel:\n";
 	cin >> size_kernel;
 	cout << "Ingresa sigma:\n";
 	cin >> sigma;
 
+	/*Declaracion de variables para poder realizar convolucion y expansion de imagen*/
 	int filas_add = floor(size_kernel / 2);
 	int filas_add_totales = filas_add * 2;
 	int columnas_add_totales = filas_add_totales;
@@ -168,6 +178,7 @@ int main() {
 	Mat Gray(fila_original, columna_original, CV_8UC1);
 	Mat copia(filas_copia, columnas_copia, CV_8UC1);
 
+	/*Pasamos imagen de colores a escala de grises*/
 	Gray = RGB2Gray(imagen, Gray, fila_original, columna_original);
 
 	int filas_limite = floor(size_kernel / 2);
@@ -181,7 +192,7 @@ int main() {
 	Mat Gauss(fila_original, columna_original, CV_8UC1);
 	Gauss = AplicaFiltroGauss(Gray, Gauss, kernel, size_kernel, fila_original, columna_original);
 
-	/*Ecualizacion*/
+	/*Proceso de ecualizacion*/
 	int v = 0;
 	int y[256] = { 0 };
 	int suma = 0;
@@ -209,7 +220,7 @@ int main() {
 	}
 
 
-	/*Sobel*/
+	/*Proceso creacion y aplicacion de filtro Sobel (Gx,Gy)*/
 	double** kernel_sobel_gx = new double* [3];
 
 	kernel_sobel_gx[0] = new double[3];
@@ -249,6 +260,7 @@ int main() {
 	int n = 0;
 	int pixel_f = 0;
 
+	/*Usamos funcion de convolucion para aplicar filtro sobel Gx*/
 	Mat Gx(fila_original, columna_original, CV_8UC1);
 	for (i = 1; i < Ecualizada_expandida.rows-1; i++) {
 		for (j = 1; j < Ecualizada_expandida.cols-1; j++) {
@@ -288,6 +300,8 @@ int main() {
 	kernel_sobel_gy[2][1] = 2;
 	kernel_sobel_gy[2][2] = 1;
 
+
+	/*Usamos funcion de convolucion para aplicar filtro sobel Gy*/
 	Mat Gy(fila_original, columna_original, CV_8UC1);
 	for (i = 1; i < Gx_Expandida.rows - 1; i++) {
 		for (j = 1; j < Gx_Expandida.cols - 1; j++) {
@@ -313,6 +327,7 @@ int main() {
 		}
 	}
 
+	/*Impresion de datos*/
 	cout << "Kernel para el filtro de Gauss\n";
 	cout << "--------------------------------------------------\n";
 	for (i = 0; i < size_kernel;i++) {
